@@ -3,8 +3,10 @@
 ## How to use:
 
 ```sh
-javac BrokerLogBinder.java && java BrokerLogBinder <input.log>
+java BrokerLogBinder <input.log>
 ```
+
+Requirements: JRE 8 or above
 
 ### Expected Input Format:
 
@@ -31,6 +33,14 @@ Make an example file named 'example.log' with the contents above.
 ```txt
 $ javac BrokerLogBinder.class && java BrokerLogBinder example.log
 select * from foo where id = 1
+```
+
+---
+
+### How to build:
+
+```sh
+javac BrokerLogBinder.java
 ```
 
 ---
