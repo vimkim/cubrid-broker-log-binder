@@ -31,7 +31,7 @@ Make an example file named 'example.log' with the contents above.
 ### Result:
 
 ```txt
-$ javac BrokerLogBinder.class && java BrokerLogBinder example.log
+$ javac BrokerLogBinder.java && java BrokerLogBinder example.log
 select * from foo where id = 1
 ```
 
