@@ -30,7 +30,7 @@ public class BrokerLogBinder {
      * @param parameterLog
      * @return
     */
-    public static String parseBrokerLogToSQL(String brokerLog) {
+    public static String parseBrokerLogToSQL(String brokerLog, boolean removeComments) {
 
         String questionMark = " ?.?.? ";
         String questionMarkFinder = "\\s\\?\\.\\?\\.\\?\\s";
@@ -62,7 +62,9 @@ public class BrokerLogBinder {
                 pstmtSQL = pstmtSQL.replaceAll("\\s{2,10}", " ");
                 pstmtSQL = pstmtSQL.replaceAll("\\?", questionMark);
 
-                // pstmtSQL = separateComments(pstmtSQL);
+                if (removeComments) {
+                    pstmtSQL = removeComments(pstmtSQL);
+                }
 
                 result.append(pstmtSQL).append(';').append(System.getProperty("line.separator"));
             }
@@ -117,14 +119,35 @@ public class BrokerLogBinder {
         return false;
     }
 
+    public static String removeComments(String sql) {
+        // Remove single-line comments (starting with --)
+        sql = sql.replaceAll("--.*?(\r?\n|$)", " ");
+        // Remove multi-line comments (starting with /* and ending with */)
+        sql = sql.replaceAll("/\\*.*?\\*/", " ");
+        return sql.trim();
+    }
 
-    public static void main(String[] args) {
-        if (args.length != 1) {
-            System.out.println("Usage: java BrokerLogParser <filename>");
+       public static void main(String[] args) {
+        boolean removeComments = false;
+        String filename = null;
+
+        // Parse command-line arguments
+        for (int i = 0; i < args.length; i++) {
+            if ("--rm-comments".equals(args[i])) {
+                removeComments = true;
+            } else if (filename == null) {
+                filename = args[i];
+            } else {
+                System.out.println("Usage: java BrokerLogBinder [--rm-comments] <filename>");
+                return;
+            }
+        }
+
+        if (filename == null) {
+            System.out.println("Usage: java BrokerLogBinder [--rm-comments] <filename>");
             return;
         }
 
-        String filename = args[0];
         StringBuilder brokerLog = new StringBuilder();
 
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
@@ -136,7 +159,7 @@ public class BrokerLogBinder {
             e.printStackTrace();
         }
 
-        String sql = parseBrokerLogToSQL(brokerLog.toString());
+        String sql = parseBrokerLogToSQL(brokerLog.toString(), removeComments);
         System.out.println(sql);
     }
 
