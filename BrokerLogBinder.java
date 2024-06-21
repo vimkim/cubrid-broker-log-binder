@@ -66,7 +66,7 @@ public class BrokerLogBinder {
                     pstmtSQL = removeComments(pstmtSQL);
                 }
 
-                result.append(pstmtSQL).append(';').append(System.getProperty("line.separator"));
+                result.append(pstmtSQL).append(" ;").append(System.getProperty("line.separator"));
             }
             index++;
         }
