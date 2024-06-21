@@ -10,9 +10,9 @@ java BrokerLogBinder <input.log>
 
 Requirements: JRE 8 or above
 
-### Expected Input Format:
+### 1. Prepare a cubrid broker log file as an input file:
 
-CUBRID broker log file
+example.log:
 
 ```txt
 03/21 18:51:36.467 (0) CLIENT IP 127.0.0.1
@@ -28,18 +28,37 @@ CUBRID broker log file
 03/21 18:51:36.529 (0) *** elapsed time 0.052
 ```
 
-Make an example file named 'example.log' with the contents above.
+### 2. Observe the binding results:
 
-### Result:
+```sh
+java BrokerLogBinder --rm-comments example.log > output.sql
+```
+
+output.sql:
+```txt
+select * from foo where id = 1
+```
+
+### 3. Format the output file using the provided formatter binary:
+
+```sh
+./sql-formatter-executable output.sql > formatted.sql
+```
+
+formatted.sql:
 
 ```txt
-$ javac BrokerLogBinder.java && java BrokerLogBinder example.log
-select * from foo where id = 1
+select
+  *
+from
+  foo
+where
+  id = 1;
 ```
 
 ---
 
-### How to build:
+## How to build:
 
 ```sh
 javac BrokerLogBinder.java
