@@ -1,5 +1,7 @@
 # cubrid-broker-log-binder
 
+![image](https://github.com/vimkim/cubrid-broker-log-binder/assets/18080546/952e71be-e8a5-4598-9620-a4679804670a)
+
 ## How to use:
 
 ```sh
