@@ -5,10 +5,18 @@
 ## How to use:
 
 ```sh
-java BrokerLogBinder <input.log>
+java BrokerLogBinder [--rm-comments] <input.log>
 ```
 
 Requirements: JRE 8 or above
+
+### Options:
+```text
+
+--rm-comments
+    removes csql comments while processing the input.log.
+
+```
 
 ### 1. Prepare a cubrid broker log file as an input file:
 
