@@ -23,96 +23,100 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BrokerLogBinder {
-/**
-	 * get normal SQL from pstmtSQL and the parameter bind log
-	 *
-	 * @param pstmtSQL
-	 * @param parameterLog
-	 * @return
-	 */
-	public static String parseBrokerLogToSQL(String brokerLog) {
+    /**
+     * get normal SQL from pstmtSQL and the parameter bind log
+     *
+     * @param pstmtSQL
+     * @param parameterLog
+     * @return
+    */
+    public static String parseBrokerLogToSQL(String brokerLog) {
 
-		String questionMark = " ?.?.? ";
-		String questionMarkFinder = "\\s\\?\\.\\?\\.\\?\\s";
-		StringBuilder result = new StringBuilder();
+        String questionMark = " ?.?.? ";
+        String questionMarkFinder = "\\s\\?\\.\\?\\.\\?\\s";
+        StringBuilder result = new StringBuilder();
 
-		String pstmtSQLRegex = "(execute|execute_all)\\ssrv_h_id\\s\\d+\\s.+";
-		Pattern pstmtSQLPattern = Pattern.compile(pstmtSQLRegex);
-		Matcher pstmtSQLMatcher = pstmtSQLPattern.matcher(brokerLog);
+        String pstmtSQLRegex = "(execute|execute_all)\\ssrv_h_id\\s\\d+\\s.+";
+        Pattern pstmtSQLPattern = Pattern.compile(pstmtSQLRegex);
+        Matcher pstmtSQLMatcher = pstmtSQLPattern.matcher(brokerLog);
 
-		String pstmtSQLRegex2 = "(execute|execute_all)\\ssrv_h_id\\s\\d+\\s";
-		Pattern pstmtSQLPattern2 = Pattern.compile(pstmtSQLRegex2);
+        String pstmtSQLRegex2 = "(execute|execute_all)\\ssrv_h_id\\s\\d+\\s";
+        Pattern pstmtSQLPattern2 = Pattern.compile(pstmtSQLRegex2);
 
-		String paramRegex = "bind\\s\\d+\\s:\\s(INT\\s.+|DATETIME\\s.+|TIME\\s.+|DATE\\s.+|BIGINT\\s.+|DOUBLE\\s.+|FLOAT\\s.+|SHORT\\s.+|(VARCHAR\\s\\(\\d+\\).+)|VARCHAR\\s\\(\\d+\\)|NULL)";
-		String valueRegex = "bind\\s\\d+\\s:\\s(INT\\s|DATETIME\\s|DATE\\s|TIME\\s|BIGINT\\s|DOUBLE\\s|FLOAT\\s|SHORT\\s|(VARCHAR\\s\\(\\d+\\)|.+)|NULL)";
-		String typeRegex = "bind\\s\\d+\\s:\\s";
-		Pattern paramPattern = Pattern.compile(paramRegex);
-		Pattern valuePattern = Pattern.compile(valueRegex);
-		Pattern typePattern = Pattern.compile(typeRegex);
+        String paramRegex = "bind\\s\\d+\\s:\\s(INT\\s.+|DATETIME\\s.+|TIME\\s.+|DATE\\s.+|BIGINT\\s.+|DOUBLE\\s.+|FLOAT\\s.+|SHORT\\s.+|(VARCHAR\\s\\(\\d+\\).+)|VARCHAR\\s\\(\\d+\\)|NULL)";
+        String valueRegex = "bind\\s\\d+\\s:\\s(INT\\s|DATETIME\\s|DATE\\s|TIME\\s|BIGINT\\s|DOUBLE\\s|FLOAT\\s|SHORT\\s|(VARCHAR\\s\\(\\d+\\)|.+)|NULL)";
+        String typeRegex = "bind\\s\\d+\\s:\\s";
+        Pattern paramPattern = Pattern.compile(paramRegex);
+        Pattern valuePattern = Pattern.compile(valueRegex);
+        Pattern typePattern = Pattern.compile(typeRegex);
 
-		int index = 0;
-		while (pstmtSQLMatcher.find()) {
-			String onePstmtSQLString = pstmtSQLMatcher.group(0);
-			Matcher pstmtSQLMatcher2 = pstmtSQLPattern2.matcher(onePstmtSQLString);
-			if (pstmtSQLMatcher2.find()) {
-				if (index != 0) {
-					result.append(System.getProperty("line.separator"));
-				}
-				String pstmtSQL = onePstmtSQLString.substring(pstmtSQLMatcher2.end());
-				pstmtSQL = pstmtSQL.replaceAll("\\s{2,10}", " ");
-				pstmtSQL = pstmtSQL.replaceAll("\\?", questionMark);
-				result.append(pstmtSQL).append(';').append(System.getProperty("line.separator"));
-			}
-			index++;
-		}
+        int index = 0;
+        while (pstmtSQLMatcher.find()) {
+            String onePstmtSQLString = pstmtSQLMatcher.group(0);
+            Matcher pstmtSQLMatcher2 = pstmtSQLPattern2.matcher(onePstmtSQLString);
+            if (pstmtSQLMatcher2.find()) {
+                if (index != 0) {
+                    result.append(System.getProperty("line.separator"));
+                }
+                String pstmtSQL = onePstmtSQLString.substring(pstmtSQLMatcher2.end());
+                pstmtSQL = pstmtSQL.replaceAll("\\s{2,10}", " ");
+                pstmtSQL = pstmtSQL.replaceAll("\\?", questionMark);
 
-		if (index == 0) {
-			return "";
-		}
+                // pstmtSQL = separateComments(pstmtSQL);
 
-		Matcher paramMatcher = paramPattern.matcher(brokerLog);
-		List<HashMap<String, String>> paramTypeValueList = new ArrayList<HashMap<String, String>>();
-		while (paramMatcher.find()) {
-			String paramString = paramMatcher.group(0);
-			Matcher valueMatcher = valuePattern.matcher(paramString);
-			Matcher typeMatcher = typePattern.matcher(paramString);
-			String parameter = "";
-			if (valueMatcher.find()) {
-				parameter = paramString.substring(valueMatcher.end());
-				String type = "";
-				if (typeMatcher.find()) {
-					type = paramString.substring(typeMatcher.end(), valueMatcher.end());
-				}
-				HashMap<String, String> map = new HashMap<String, String>();
-				map.put(parameter, type);
-				paramTypeValueList.add(map);
-			}
-		}
+                result.append(pstmtSQL).append(';').append(System.getProperty("line.separator"));
+            }
+            index++;
+        }
 
-		String pstmtSQL = result.toString();
-		for (Map<String, String> map : paramTypeValueList) {
-			for (Map.Entry<String, String> entry : map.entrySet()) {
-				if (isNumber(entry.getValue())) {
-					pstmtSQL = pstmtSQL.replaceFirst(questionMarkFinder, entry.getKey());
-				} else if ("NULL".equals(entry.getValue())) {
-					pstmtSQL = pstmtSQL.replaceFirst(questionMarkFinder, "NULL");
-				} else {
-					pstmtSQL = pstmtSQL.replaceFirst(questionMarkFinder, "'" + entry.getKey() + "'");
-				}
-			}
-		}
+    if (index == 0) {
+            return "";
+        }
 
-		pstmtSQL = pstmtSQL.replaceAll(questionMarkFinder, "?");
-		return pstmtSQL;
-	}
+        Matcher paramMatcher = paramPattern.matcher(brokerLog);
+        List<HashMap<String, String>> paramTypeValueList = new ArrayList<HashMap<String, String>>();
+        while (paramMatcher.find()) {
+            String paramString = paramMatcher.group(0);
+            Matcher valueMatcher = valuePattern.matcher(paramString);
+            Matcher typeMatcher = typePattern.matcher(paramString);
+            String parameter = "";
+        if (valueMatcher.find()) {
+                parameter = paramString.substring(valueMatcher.end());
+                String type = "";
+                if (typeMatcher.find()) {
+                    type = paramString.substring(typeMatcher.end(), valueMatcher.end());
+                }
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put(parameter, type);
+                paramTypeValueList.add(map);
+            }
+        }
 
-	public static boolean isNumber(String type) {
-		if (type.indexOf("INT") > -1 || type.indexOf("BIGINT") > -1 || type.indexOf("DOUBLE") > -1
-				|| type.indexOf("FLOAT") > -1 || type.indexOf("SHORT") > -1) {
-			return true;
-		}
-		return false;
-	}
+        String pstmtSQL = result.toString();
+        for (Map<String, String> map : paramTypeValueList) {
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (isNumber(entry.getValue())) {
+                    pstmtSQL = pstmtSQL.replaceFirst(questionMarkFinder, entry.getKey());
+                } else if ("NULL".equals(entry.getValue())) {
+                    pstmtSQL = pstmtSQL.replaceFirst(questionMarkFinder, "NULL");
+                } else {
+                    pstmtSQL = pstmtSQL.replaceFirst(questionMarkFinder, "'" + entry.getKey() + "'");
+                }
+            }
+        }
+
+        pstmtSQL = pstmtSQL.replaceAll(questionMarkFinder, "?");
+        return pstmtSQL;
+    }
+
+    public static boolean isNumber(String type) {
+        if (type.indexOf("INT") > -1 || type.indexOf("BIGINT") > -1 || type.indexOf("DOUBLE") > -1
+        || type.indexOf("FLOAT") > -1 || type.indexOf("SHORT") > -1) {
+            return true;
+        }
+        return false;
+    }
+
 
     public static void main(String[] args) {
         if (args.length != 1) {
