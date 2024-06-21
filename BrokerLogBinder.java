@@ -61,7 +61,7 @@ public class BrokerLogBinder {
 				String pstmtSQL = onePstmtSQLString.substring(pstmtSQLMatcher2.end());
 				pstmtSQL = pstmtSQL.replaceAll("\\s{2,10}", " ");
 				pstmtSQL = pstmtSQL.replaceAll("\\?", questionMark);
-				result.append(pstmtSQL);
+				result.append(pstmtSQL).append(';').append(System.getProperty("line.separator"));
 			}
 			index++;
 		}
