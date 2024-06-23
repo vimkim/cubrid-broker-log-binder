@@ -2,7 +2,7 @@
 
 ![image](https://github.com/vimkim/cubrid-broker-log-binder/assets/18080546/952e71be-e8a5-4598-9620-a4679804670a)
 
-## How to use:
+## How to use
 
 ```sh
 java BrokerLogBinder [--rm-comments] <input.log>
@@ -10,7 +10,8 @@ java BrokerLogBinder [--rm-comments] <input.log>
 
 Requirements: JRE 8 or above
 
-### Options:
+### Options
+
 ```text
 
 --rm-comments
@@ -18,7 +19,7 @@ Requirements: JRE 8 or above
 
 ```
 
-### 1. Prepare a cubrid broker log file as an input file:
+### 1. Prepare a cubrid broker log file as an input file
 
 example.log:
 
@@ -36,18 +37,19 @@ example.log:
 03/21 18:51:36.529 (0) *** elapsed time 0.052
 ```
 
-### 2. Observe the binding results:
+### 2. Observe the binding results
 
 ```sh
 java BrokerLogBinder --rm-comments example.log > output.sql
 ```
 
 output.sql:
+
 ```txt
 select * from foo where id = 1
 ```
 
-### 3. Format the output file using the provided formatter binary:
+### 3. Format the output file using the provided formatter binary
 
 ```sh
 ./sql-formatter-executable output.sql > formatted.sql
@@ -66,7 +68,7 @@ where
 
 ---
 
-## How to build:
+## How to build
 
 ```sh
 javac BrokerLogBinder.java
@@ -76,6 +78,6 @@ javac BrokerLogBinder.java
 
 ### Reference
 
-- Related Jira issue: http://jira.cubrid.com/browse/RND-2175
+- Related Jira issue: <http://jira.cubrid.com/browse/RND-2175>
 
 - Original source: [cubrid manager source code](https://github.com/CUBRID/cubrid-manager/blob/develop/com.cubrid.common.ui/src/com/cubrid/common/ui/spi/util/CommonUITool.java#L1247)
