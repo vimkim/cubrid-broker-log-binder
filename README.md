@@ -49,7 +49,17 @@ output.sql:
 select * from foo where id = 1
 ```
 
-### 3. Format the output file using the provided formatter binary
+### 3. Format the output file using the provided formatter binary (Experimental)
+
+You have three experimental options.
+
+#### Option 1. Sleek
+
+```sh
+cat output.sql | ./sleek-binary > formatted.sql
+```
+
+#### Option 2. sql-format
 
 ```sh
 ./sql-formatter-executable output.sql > formatted.sql
@@ -65,6 +75,10 @@ from
 where
   id = 1;
 ```
+
+#### Option 3. CUBRID fsqlf
+
+Use a CUBRID csql-flavored formatter from <https://github.com/CUBRID/fsqlf>.
 
 ---
 
