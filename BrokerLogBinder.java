@@ -1,3 +1,4 @@
+
 /**
  * Author: vimkim
  * Date: 2024-05-29
@@ -29,7 +30,7 @@ public class BrokerLogBinder {
      * @param pstmtSQL
      * @param parameterLog
      * @return
-    */
+     */
     public static String parseBrokerLogToSQL(String brokerLog, boolean removeComments) {
 
         String questionMark = " ?.?.? ";
@@ -71,7 +72,7 @@ public class BrokerLogBinder {
             index++;
         }
 
-    if (index == 0) {
+        if (index == 0) {
             return "";
         }
 
@@ -82,7 +83,7 @@ public class BrokerLogBinder {
             Matcher valueMatcher = valuePattern.matcher(paramString);
             Matcher typeMatcher = typePattern.matcher(paramString);
             String parameter = "";
-        if (valueMatcher.find()) {
+            if (valueMatcher.find()) {
                 parameter = paramString.substring(valueMatcher.end());
                 String type = "";
                 if (typeMatcher.find()) {
@@ -97,7 +98,7 @@ public class BrokerLogBinder {
         String pstmtSQL = result.toString();
         for (Map<String, String> map : paramTypeValueList) {
             for (Map.Entry<String, String> entry : map.entrySet()) {
-            if (isNumber(entry.getValue())) {
+                if (isNumber(entry.getValue())) {
                     pstmtSQL = pstmtSQL.replaceFirst(questionMarkFinder, entry.getKey());
                 } else if ("NULL".equals(entry.getValue())) {
                     pstmtSQL = pstmtSQL.replaceFirst(questionMarkFinder, "NULL");
@@ -113,7 +114,7 @@ public class BrokerLogBinder {
 
     public static boolean isNumber(String type) {
         if (type.indexOf("INT") > -1 || type.indexOf("BIGINT") > -1 || type.indexOf("DOUBLE") > -1
-        || type.indexOf("FLOAT") > -1 || type.indexOf("SHORT") > -1) {
+                || type.indexOf("FLOAT") > -1 || type.indexOf("SHORT") > -1) {
             return true;
         }
         return false;
@@ -127,7 +128,7 @@ public class BrokerLogBinder {
         return sql.trim();
     }
 
-       public static void main(String[] args) {
+    public static void main(String[] args) {
         boolean removeComments = false;
         String filename = null;
 
@@ -148,19 +149,35 @@ public class BrokerLogBinder {
             return;
         }
 
-        StringBuilder brokerLog = new StringBuilder();
-
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String line;
+            StringBuilder queryBlock = new StringBuilder();
+            boolean inQueryBlock = false;
+
             while ((line = br.readLine()) != null) {
-                brokerLog.append(line).append(System.getProperty("line.separator"));
+                // Check if the line starts with a query block identifier
+                if (line.startsWith("[Q")) {
+                    // If we have collected a query block, print it
+                    if (queryBlock.length() > 0) {
+
+                        System.out.println(parseBrokerLogToSQL(queryBlock.toString(), removeComments));
+                        queryBlock.setLength(0); // reset the StringBuilder for the next query block
+                    }
+                    inQueryBlock = true;
+                }
+
+                // Append the current line to the query block if we are in a query block
+                if (inQueryBlock) {
+                    queryBlock.append(line).append(System.lineSeparator());
+                }
+            }
+
+            // Print the last query block if it exists
+            if (queryBlock.length() > 0) {
+                System.out.println(parseBrokerLogToSQL(queryBlock.toString(), removeComments));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        String sql = parseBrokerLogToSQL(brokerLog.toString(), removeComments);
-        System.out.println(sql);
     }
-
 }
