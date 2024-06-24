@@ -121,10 +121,17 @@ public class BrokerLogBinder {
     }
 
     public static String removeComments(String sql) {
-        // Remove single-line comments (starting with --)
-        sql = sql.replaceAll("--.*?(\r?\n|$)", " ");
+
+        // Remove traditional sql-style single-line comments (starting with --)
+        // sql = sql.replaceAll("--.*?(\r?\n|$)", " "); // loss of new line, theoratically impossible
+
         // Remove multi-line comments (starting with /* and ending with */)
         sql = sql.replaceAll("/\\*.*?\\*/", " ");
+
+
+        // Remove c-style single-line comments (starting with //)
+        //sql = sql.replaceAll("//.*?(\r?\n|$)", " "); // loss of new line, theoratically impossible
+
         return sql.trim();
     }
 
@@ -157,6 +164,9 @@ public class BrokerLogBinder {
                 StringBuilder queryBlock = new StringBuilder();
                 boolean inQueryBlock = false;
 
+                int queryBlockNumber = 1;
+
+
                 if (firstLine.startsWith("[Q")) {
                     inQueryBlock = true;
                     queryBlock.append(firstLine).append(System.lineSeparator());
@@ -165,6 +175,7 @@ public class BrokerLogBinder {
                 while ((line = br.readLine()) != null) {
                     if (line.startsWith("[Q")) {
                         if (queryBlock.length() > 0) {
+                            System.out.println(queryBlockNumber++);
                             System.out.println(parseBrokerLogToSQL(queryBlock.toString(), removeComments));
                             queryBlock.setLength(0);
                         }
@@ -177,6 +188,7 @@ public class BrokerLogBinder {
                 }
 
                 if (queryBlock.length() > 0) {
+                    System.out.println(queryBlockNumber++);
                     System.out.println(parseBrokerLogToSQL(queryBlock.toString(), removeComments));
                 }
             } else {
