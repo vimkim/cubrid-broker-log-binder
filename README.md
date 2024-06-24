@@ -33,8 +33,6 @@ javac PrintNthQuery.java && java PrintNthQuery output.sql 3
 javac PrintNthQuery.java && java PrintNthQuery output.sql 3 | ./sleek-binary
 ```
 
-쉘을 잘 아신다면 위 내용만 보셔도 충분합니다.
-
 ---
 
 ### Input
