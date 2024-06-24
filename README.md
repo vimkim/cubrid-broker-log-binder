@@ -1,6 +1,6 @@
 # Cubrid Broker Log Utilities
 
-큐브리드 브로커 로그를 더 쉽게 보고 분석할 수 있게 해주는 유틸리티 모음 패키지입니다.
+큐브리드 브로커 로그를 더 쉽게 보고 분석할 수 있게 해주는 유틸리티 패키지입니다.
 
 - Broker Log Binder
 - Nth Query Printer
