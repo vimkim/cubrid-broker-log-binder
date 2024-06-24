@@ -150,34 +150,49 @@ public class BrokerLogBinder {
         }
 
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
-            String line;
-            StringBuilder queryBlock = new StringBuilder();
-            boolean inQueryBlock = false;
+            String firstLine = br.readLine();
 
-            while ((line = br.readLine()) != null) {
-                // Check if the line starts with a query block identifier
-                if (line.startsWith("[Q")) {
-                    // If we have collected a query block, print it
-                    if (queryBlock.length() > 0) {
+            if (firstLine != null && firstLine.startsWith("[Q")) {
+                String line;
+                StringBuilder queryBlock = new StringBuilder();
+                boolean inQueryBlock = false;
 
-                        System.out.println(parseBrokerLogToSQL(queryBlock.toString(), removeComments));
-                        queryBlock.setLength(0); // reset the StringBuilder for the next query block
-                    }
+                if (firstLine.startsWith("[Q")) {
                     inQueryBlock = true;
+                    queryBlock.append(firstLine).append(System.lineSeparator());
                 }
 
-                // Append the current line to the query block if we are in a query block
-                if (inQueryBlock) {
-                    queryBlock.append(line).append(System.lineSeparator());
-                }
-            }
+                while ((line = br.readLine()) != null) {
+                    if (line.startsWith("[Q")) {
+                        if (queryBlock.length() > 0) {
+                            System.out.println(parseBrokerLogToSQL(queryBlock.toString(), removeComments));
+                            queryBlock.setLength(0);
+                        }
+                        inQueryBlock = true;
+                    }
 
-            // Print the last query block if it exists
-            if (queryBlock.length() > 0) {
-                System.out.println(parseBrokerLogToSQL(queryBlock.toString(), removeComments));
+                    if (inQueryBlock) {
+                        queryBlock.append(line).append(System.lineSeparator());
+                    }
+                }
+
+                if (queryBlock.length() > 0) {
+                    System.out.println(parseBrokerLogToSQL(queryBlock.toString(), removeComments));
+                }
+            } else {
+                StringBuilder entireFileContent = new StringBuilder();
+                entireFileContent.append(firstLine).append(System.lineSeparator());
+
+                String line;
+                while ((line = br.readLine()) != null) {
+                    entireFileContent.append(line).append(System.lineSeparator());
+                }
+
+                System.out.println(parseBrokerLogToSQL(entireFileContent.toString(), removeComments));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 }
