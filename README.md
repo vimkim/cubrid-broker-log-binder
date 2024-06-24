@@ -1,8 +1,78 @@
-# cubrid-broker-log-binder
+# Cubrid Broker Log Utilities
 
-![image](https://github.com/vimkim/cubrid-broker-log-binder/assets/18080546/952e71be-e8a5-4598-9620-a4679804670a)
+큐브리드 브로커 로그를 더 쉽게 보고 분석할 수 있게 해주는 유틸리티 모음 패키지입니다.
 
-## How to use
+- Broker Log Binder
+- Nth Query Printer
+- Formatters
+
+위와 같이 구성되어 있습니다.
+
+다음과 같은 기능을 지원합니다:
+
+- [x] 변수 바인딩
+- [x] 주석 제거
+- [x] 인자 번호에 해당하는 쿼리를 출력
+- [x] SQL 포매팅
+
+## Summary
+
+사용법 요약:
+
+```sh
+# remove single-line comments
+sed 's/--[^\t]*\t/\t/g' log_top.q | sed 's/\/\/[^\t]*\t/\t/g' > log_top_wo_comments.q
+
+# remove multi-line comments and bind parameters
+javac BrokerLogBinder.java && java BrokerLogBinder --rm-comments log_top_wo_comments.q > output.sql
+
+# print n-th query from output.sql
+javac PrintNthQuery.java && java PrintNthQuery output.sql 3
+
+# using the above utility program, get the formatted output
+javac PrintNthQuery.java && java PrintNthQuery output.sql 3 | ./sleek-binary
+```
+
+쉘을 잘 아신다면 위 내용만 보셔도 충분합니다.
+
+---
+
+### Input
+
+log_top.q 파일
+
+크기 50MB, 20만줄 이상의 대용량 파일도 5초 안에 결과를 얻으실 수 있습니다.
+
+---
+
+### Output
+
+```sql
+SELECT
+    DISTINCT A.comp_cd,
+    A.id_row,
+    A.empno,
+    B.empno_nm,
+    B.lev_ind,
+    A.dept_cd,
+    TO_CHAR(A.ate_day, 'YYYY-MM-DD') AS ateDay,
+    WEEKDAY(A.ate_day) AS ateDayNo,
+    A.ate_cd,
+    D.ate_nm,
+    TO_CHAR(Z.req_rest_sdt, 'YYYY-MM-DD') AS rest_sdt,
+    TO_CHAR(Z.req_rest_edt, 'YYYY-MM-DD') AS rest_edt,
+    (
+        CASE
+            WHEN HOUR(Z.req_rest_sdt) < 10 THEN '0' || TO_CHAR(HOUR(Z.req_rest_sdt))
+            ELSE TO_CHAR(HOUR(Z.req_rest_sdt))
+        END
+    ) AS rest_shour,
+...
+```
+
+---
+
+## BrokerLogBinder
 
 ```sh
 java BrokerLogBinder [--rm-comments] <input.log>
@@ -49,17 +119,35 @@ output.sql:
 select * from foo where id = 1
 ```
 
-### 3. Format the output file using the provided formatter binary (Experimental)
+---
+
+## PrintNthQuery
+
+```sh
+java PrintNthQuery <filename-generated-by-BrokerLogBinder> <query number>
+```
+
+BrokerLogBinder를 통해 생성된 파일의 이름과, 쿼리 번호를 인자로 주면, 해당 쿼리를 출력합니다. 
+
+---
+
+## SQL Formatter
+
+- sleek (written in rust): https://github.com/nrempel/sleek
+- sql-format (from npm): https://github.com/sql-formatter-org/sql-formatter
+- CUBRID fsqlf: https://github.com/CUBRID/fsqlf
+
+Use whichever you prefer. I personally recommend the first one combined with PrintNthQuery.
 
 You have three experimental options.
 
-#### Option 1. Sleek
+### Sleek
 
 ```sh
 cat output.sql | ./sleek-binary > formatted.sql
 ```
 
-#### Option 2. sql-format
+### sql-format
 
 ```sh
 ./sql-formatter-executable output.sql > formatted.sql
@@ -76,7 +164,7 @@ where
   id = 1;
 ```
 
-#### Option 3. CUBRID fsqlf
+### CUBRID fsqlf
 
 Use a CUBRID csql-flavored formatter from <https://github.com/CUBRID/fsqlf>.
 
