@@ -15,6 +15,10 @@
 - [x] 인자 번호에 해당하는 쿼리를 출력
 - [x] SQL 포매팅
 
+![image](https://github.com/vimkim/cubrid-broker-log-binder/assets/18080546/99395e8a-12ff-47bb-9f21-369798c61f10)
+
+위 이미지와 같이 bind 변수 1을 ?의 자리에 자동으로 넣어주고 포매팅합니다.
+
 ## Summary
 
 사용법 요약:
