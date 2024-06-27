@@ -25,16 +25,28 @@
 
 ```sh
 # remove single-line comments
-sed 's/--[^\t]*\t/\t/g' log_top.q | sed 's/\/\/[^\t]*\t/\t/g' > log_top_wo_comments.q
+./remove-sigleline-comments/remove-singleline-comments < log_top.q > log_top_wo_comments.q
+
+# The above operation is equivalent to using the following sed commands:
+# $ sed 's/--[^\t]*\t/\t/g' log_top.q | sed 's/\/\/[^\t]*\t/\t/g' > log_top_wo_comments.q
 
 # remove multi-line comments and bind parameters
 javac BrokerLogBinder.java && java BrokerLogBinder --rm-comments log_top_wo_comments.q > output.sql
 
-# print n-th query from output.sql
+# Compile and run PrintNthQuery to extract the 3rd SQL query from output.sql
+# Usage: javac PrintNthQuery.java && java PrintNthQuery output.sql 3
 javac PrintNthQuery.java && java PrintNthQuery output.sql 3
 
-# using the above utility program, get the formatted output
+# Note:
+# Using formatters like 'sleek' or 'sqlformat' directly on output.sql, which contains multiple SQL statements,
+# can be resource-intensive and time-consuming.
+# It is recommended to use the PrintNthQuery utility to extract and format a specific SQL statement.
+# This approach minimizes memory usage and processing time.
+
+# Example:
+# Extract and format the 3rd SQL query from output.sql using the PrintNthQuery utility and sleek formatter
 javac PrintNthQuery.java && java PrintNthQuery output.sql 3 | ./sleek-binary
+
 ```
 
 ---
