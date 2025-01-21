@@ -1,0 +1,5 @@
+/test/
+
+# to prevent test q files and sql files to be uploaded, that might contain sensitive information.
+*.q
+*.sql
