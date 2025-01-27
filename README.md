@@ -1,5 +1,15 @@
 # Cubrid Broker Log Utilities
 
+## DEPRECATION WARNING
+
+> 이 프로젝트는 더이상 maintain되지 않습니다.
+[github.com/vimkim/cubrid-logtopbind-rs](https://github.com/vimkim/cubrid-logtopbind-rs) 에서 계속됩니다.
+
+### DEPRECATED
+### DEPRECATED
+### DEPRECATED
+
+
 큐브리드 브로커 로그를 더 쉽게 보고 분석할 수 있게 해주는 유틸리티 패키지입니다.
 
 - Broker Log Binder
